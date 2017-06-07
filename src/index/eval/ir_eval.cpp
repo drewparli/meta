@@ -217,6 +217,62 @@ double ir_eval::gmap() const
     return std::exp(sum / scores_.size());
 }
 
+/**
+ * Adding support for reciprocal rank metric
+ */
+double ir_eval::rr(const std::vector<search_result>& results,
+                    query_id q_id, uint64_t num_docs) const
+{
+    // find the actual list of relevant documents for the given query
+    const auto& ht = qrels_.find(q_id);
+
+    /**
+     * Check 1: Are there any relevant docs in the qrel?
+     * Check 2: Are there any search results?
+     */
+    if (ht == qrels_.end() || results.empty())
+    {
+        // default score if we get here
+        reciproc_ranks_.push_back(0.0);
+        return 0.0;
+    }
+
+    /**
+     * Maintain the index of the search results list to find the first
+     * relevant document, then stop.
+     */
+    uint64_t i = 1;
+    for (auto& result : results)
+    {
+        // check if the current document in the results list is relevant
+        if (map::safe_at(ht->second, result.d_id) != 0)
+            // found the first relevant document, done!
+            reciproc_ranks_.push_back(1.0 / i);
+            return 1.0 / i;
+        else
+            // still looking for a relevant document, increment the index
+            ++i;
+    }
+
+    // no relevant documents, return default score if we get here
+    reciproc_ranks_.push_back(0.0);
+    return 0.0;
+}
+
+/**
+ * Adding support for reciprocal mean rank metric
+ */
+double ir_eval::mrr() const
+{
+    // check that rr scores exist
+    if (reciproc_ranks_.empty())
+        return 0.0;
+
+    // sum the all rr scores and take the average
+    return std::accumulate(reciproc_ranks_.begin(), reciproc_ranks_.end(), 0.0)
+           / reciproc_ranks_.size();
+}
+
 void ir_eval::print_stats(const std::vector<search_result>& results,
                           query_id q_id, std::ostream& out, uint64_t num_docs)
 {
