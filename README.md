@@ -1,7 +1,6 @@
 # MeTA: ModErn Text Analysis
 
-Please visit our [web page][meta-website] for information and tutorials
-about MeTA!
+This is a fork of the MeTA toolkit as of 7 June 2017. For more information about the project visit the [web page][meta-website].
 
 ### Build Status (by branch)
 - master: [![Build
