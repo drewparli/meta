@@ -6,3 +6,4 @@ Support has been added for evaluation of the mean reciprocal rank.
 The following files have been effected,
   - `ir_eval.h`
   - `ir_eval.cpp`
+  - `ir_eval_test.cpp`
